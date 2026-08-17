@@ -1,0 +1,10 @@
+import Link from "next/link";
+import { PromptAnatomy } from "@/components/prompt-anatomy";
+import { scenarios } from "@/lib/content";
+
+const steps = [["01", "看清任务", "明确业务目标、材料和不适用范围。"], ["02", "写出结构", "用六部分组织 Prompt，而不是堆砌形容词。"], ["03", "控制变量", "在实验室一次只调整 Prompt、参数或提示技术。"], ["04", "观察结果", "比较输出结构、差异、耗时与 Token 用量，理解变化来自哪里。"]];
+export default function Home() { return <><section className="hero shell"><div><p className="eyebrow">中文 · 从零开始 · 业务导向</p><h1>把“问模型”<br />变成<strong>可复用的工作方法</strong></h1><p className="hero-text">学习分析任务、组织提示词、调用兼容 API，并用测试证明结果真的更好。</p><div className="actions"><Link className="button" href="/learn">从第一课开始</Link><Link className="text-link" href="/scenarios">先看业务案例 →</Link></div></div><aside className="hero-card"><p>你的学习闭环</p><ol><li>识别业务任务</li><li>补齐上下文与约束</li><li>选择合适技术</li><li>运行、检查、迭代</li></ol><span>不是万能 Prompt，而是一套可验证的过程。</span></aside></section>
+<section className="section shell"><div className="section-heading"><p className="eyebrow">核心框架</p><h2>每个 Prompt 都先过六部分检查</h2><p>信息够用即可，明确、可检查比“越长越好”更重要。</p></div><PromptAnatomy /></section>
+<section className="section tint"><div className="shell"><div className="section-heading"><p className="eyebrow">学习路径</p><h2>四步建立可迁移能力</h2></div><div className="steps">{steps.map(([number, title, text]) => <article key={number}><span>{number}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
+<section className="section shell"><div className="section-heading split"><div><p className="eyebrow">12 个业务案例</p><h2>从你熟悉的场景练起</h2></div><Link className="text-link" href="/scenarios">全部场景 →</Link></div><div className="category-row">{[...new Map(scenarios.map((s) => [s.category, s])).values()].map((s) => <Link key={s.category} href={`/scenarios/${s.slug}`}><span>{s.emoji}</span>{s.category}</Link>)}</div></section>
+<section className="shell callout"><div><p className="eyebrow">现在就试</p><h2>没有 API Key 也能开始</h2><p>实验室会清楚标注演示结果；配置服务端环境变量后，才调用你的兼容模型服务。</p></div><Link className="button" href="/playground">打开 Prompt 实验室</Link></section></> }

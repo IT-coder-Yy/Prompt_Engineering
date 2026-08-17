@@ -1,0 +1,36 @@
+.experiment-layout { display: grid; gap: 18px; }
+.experiment-controls { max-width: 760px; }
+.experiment-note { margin: 18px 0; padding: 18px; background: #f0fdfa; border-radius: 10px; }
+.experiment-note h3 { font-size: 16px; margin: 0 0 8px; }
+.experiment-note p:last-child { margin-bottom: 0; }
+.variant-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.variant-editor { border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.variant-editor h3 { font-size: 16px; }
+.variant-editor label { display: block; font-size: 14px; font-weight: 700; margin: 13px 0; }
+.variant-editor input, .variant-editor textarea { display: block; width: 100%; margin-top: 6px; padding: 9px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; font: inherit; }
+.variant-editor textarea { min-height: 250px; font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.experiment-results { min-height: 240px; }
+.result details { margin-top: 12px; }
+.result summary { font-size: 13px; color: var(--brand); cursor: pointer; }
+.result details pre { margin-top: 8px; }
+.experiment-card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.experiment-card { padding: 20px; }
+.experiment-card h3 { font-size: 18px; }
+.experiment-card .button { margin-top: 8px; }
+.technique-panel, .workflow-note, .technique-inputs { margin: 18px 0; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.technique-panel > p, .workflow-note > p:last-child { font-size: 14px; color: var(--muted); }
+.technique-options { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.technique-options label { display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 600; }
+.technique-options input { width: auto; margin: 0; }
+.technique-inputs summary, .parameter-details summary { cursor: pointer; font-weight: 700; color: var(--brand); }
+.technique-inputs label, .parameter-details > label { display: block; font-size: 14px; font-weight: 700; margin: 13px 0; }
+.technique-inputs textarea, .technique-inputs input, .parameter-details textarea { display: block; width: 100%; margin-top: 6px; padding: 9px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; }
+.technique-inputs textarea, .parameter-details textarea { min-height: 88px; }
+.parameter-details { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.parameter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.parameter-grid label { margin: 0; }
+.result-group { margin-top: 24px; }
+.result-group > h3 { padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.result h4 { margin-bottom: 8px; }
+@media(max-width:800px) { .variant-grid, .experiment-card-grid { grid-template-columns: 1fr; } }
+@media(max-width:480px) { .parameter-grid { grid-template-columns: 1fr; } }
