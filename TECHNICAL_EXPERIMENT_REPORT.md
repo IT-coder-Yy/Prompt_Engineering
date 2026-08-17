@@ -180,8 +180,8 @@ P5 会明确列出状态值、时间字段和金额字段的假设，并增加�
 
 固定完整 Prompt 和每个场景的第一条正常输入，使用以下五个参数进行二值全组合：
 
-| 参数                  | 两个取值         |
-| --------------------- | ---------------- |
+| 参数                | 两个取值     |
+| ------------------- | ------------ |
 | `temperature`       | `0.1`、`0.9` |
 | `top_p`             | `0.5`、`1.0` |
 | `max_tokens`        | `256`、`800` |
@@ -293,36 +293,3 @@ SQL 基线已经可以生成关联查询，但对 `status` 的具体取值存在
 4. `temperature`、`top_p`、输出预算和惩罚参数需要结合具体任务测试，不能凭参数名称推断效果。
 5. Few-shot、分步依据、方向性刺激和结构化输出各自影响不同方面，组合技术并不必然优于单项技术。
 6. 工单分类、内容改写和 SQL 草稿对 Prompt 与参数的敏感点不同，因此实验应按业务任务分别设计，而不能只用一个通用样本得出结论。
-
-## 9. 原始实验结果
-
-以下文件保存了本报告使用的完整 Prompt、参数、状态码和模型原始输出：
-
-### Prompt 渐进实验
-
-- [工单分类第一条样本](artifacts/experiment-results/prompt-ticket-0-0.json)
-- [工单分类第二条样本](artifacts/experiment-results/prompt-ticket-1-1.json)
-- [工单分类剩余三条样本](artifacts/experiment-results/prompt-ticket-2-4.json)
-- [内容改写前两条样本](artifacts/experiment-results/prompt-content-0-1.json)
-- [内容改写剩余三条样本](artifacts/experiment-results/prompt-content-2-4.json)
-- [SQL 草稿前两条样本](artifacts/experiment-results/prompt-sql-0-1.json)
-- [SQL 草稿剩余三条样本](artifacts/experiment-results/prompt-sql-2-4.json)
-
-### 参数组合实验
-
-- [工单分类参数组合 0～7](artifacts/experiment-results/parameters-ticket-0-7.json)
-- [工单分类参数组合 8～15](artifacts/experiment-results/parameters-ticket-8-15.json)
-- [工单分类参数组合 16～31](artifacts/experiment-results/parameters-ticket-16-31.json)
-- [内容改写参数组合 0～15](artifacts/experiment-results/parameters-content-0-15.json)
-- [内容改写参数组合 16～31](artifacts/experiment-results/parameters-content-16-31.json)
-- [SQL 草稿参数组合 0～15](artifacts/experiment-results/parameters-sql-0-15.json)
-- [SQL 草稿参数组合 16～31](artifacts/experiment-results/parameters-sql-16-31.json)
-
-### 提示技术组合实验
-
-- [工单分类技术组合 0～7](artifacts/experiment-results/techniques-ticket-0-7.json)
-- [工单分类技术组合 8～15](artifacts/experiment-results/techniques-ticket-8-15.json)
-- [内容改写技术组合 0～7](artifacts/experiment-results/techniques-content-0-7.json)
-- [内容改写技术组合 8～15](artifacts/experiment-results/techniques-content-8-15.json)
-- [SQL 草稿技术组合 0～7](artifacts/experiment-results/techniques-sql-0-7.json)
-- [SQL 草稿技术组合 8～15](artifacts/experiment-results/techniques-sql-8-15.json)
