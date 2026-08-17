@@ -6,6 +6,9 @@ artifacts/
 *.docx
 *.log
 .DS_Store
+AGENTS.md
+CLAUDE.md
+IMPLEMENTATION_PLAN.md
 *.tsbuildinfo
 playwright-report/
 test-results/
