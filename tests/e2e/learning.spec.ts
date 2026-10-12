@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test("学习路径可进入课程", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /把“问模型”/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /把想法说清楚/ })).toBeVisible();
   await page.getByRole("link", { name: "从第一课开始" }).click();
   await page.getByRole("link", { name: "进入课程" }).first().click();
   await expect(page.getByText("同一个需求，两种写法")).toBeVisible();
@@ -23,6 +23,9 @@ test("场景库可打开全部案例，旧模板链接会跳转", async ({ page 
 });
 
 test("实验室主动运行一轮对照组与实验组", async ({ page }) => {
+  await page.route("**/api/completions", (route) => route.fulfill({ json: {
+    content: '{"actions":[],"open_questions":["测试演示"]}', demo: true, model: "界面测试", elapsedMs: 20,
+  } }));
   await page.goto("/playground");
   await page.getByRole("combobox", { name: "业务场景" }).selectOption("__custom__");
   await expect(page.getByRole("textbox", { name: "系统提示词" })).toBeVisible();
@@ -33,4 +36,36 @@ test("实验室主动运行一轮对照组与实验组", async ({ page }) => {
   await page.getByRole("button", { name: "运行本轮实验（调用模型 2 次）" }).click();
   await expect(page.getByRole("heading", { name: "对照组输出", exact: true })).toBeVisible({ timeout: 30000 });
   await expect(page.getByRole("heading", { name: "实验组输出", exact: true })).toBeVisible({ timeout: 30000 });
+});
+
+test("首页分类入口、搜索和空状态可以连贯使用", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "办公", exact: true }).click();
+  await expect(page.getByRole("button", { name: "办公", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("link", { name: "查看案例 →" })).toHaveCount(2);
+  await page.getByRole("searchbox", { name: "搜索场景" }).fill("会议");
+  await expect(page.getByRole("link", { name: "查看案例 →" })).toHaveCount(1);
+  await page.getByRole("searchbox", { name: "搜索场景" }).fill("没有这项任务");
+  await expect(page.getByText("没有匹配的案例。", { exact: false })).toBeVisible();
+  await page.getByRole("button", { name: "清除筛选" }).click();
+  await expect(page.getByRole("link", { name: "查看案例 →" })).toHaveCount(12);
+});
+
+test("手机导航与明暗切换可用，主要页面不横向溢出", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/");
+  await page.getByLabel("菜单", { exact: true }).click();
+  await page.getByRole("navigation", { name: "移动导航" }).getByRole("link", { name: "学习", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "从概念到业务可用" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "移动导航" })).not.toBeVisible();
+  await page.getByRole("button", { name: "切换明暗主题" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.getByRole("button", { name: "切换明暗主题" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  for (const route of ["/", "/learn", "/scenarios", "/learn/model-and-prompt", "/scenarios/%E5%8A%9E%E5%85%AC-a", "/playground", "/setup"]) {
+    await page.goto(route);
+    await expect(page.locator("h1")).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
+  }
 });

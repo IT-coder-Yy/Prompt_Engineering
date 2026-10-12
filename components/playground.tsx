@@ -158,10 +158,10 @@ export function Playground() {
       {experimentMode === "single" && <section className="technique-panel"><label>提示技术<select value={singleTechnique} onChange={(event) => setSingleTechnique(event.target.value)}>{runnableTechniques.map((item) => <option value={item.id} key={item.id}>{item.title}</option>)}</select></label><button className="button secondary small" type="button" onClick={applySingleTechnique}>生成严格消融 Prompt</button></section>}
       {experimentMode === "combo" && <section className="technique-panel"><p><b>可运行技术组合</b>：可多选；组合探索不再是严格消融。</p><div className="technique-options">{runnableTechniques.map((item) => <label key={item.id}><input type="checkbox" checked={comboTechniques.includes(item.id)} onChange={() => toggleTechnique(item.id)} />{item.title}</label>)}</div><button className="button secondary small" type="button" onClick={applyCombination}>生成组合 Prompt</button></section>}
       <TechniqueInputs examples={examples} setExamples={setExamples} direction={direction} setDirection={setDirection} fields={fields} setFields={setFields} />
-      <section className="workflow-note"><p className="eyebrow">暂不运行 · 需要工作流能力</p><p>{workflowTechniques.join("、")}。这些技术需要额外的候选采样与聚合、知识检索、工具调用、代码执行或反思循环；当前文本模型实验室不会把它们伪装成一个 Prompt 复选框。</p></section>
+      <details className="workflow-note"><summary>暂不运行 · 需要工作流能力</summary><p>{workflowTechniques.join("、")}。这些技术需要额外的候选采样与聚合、知识检索、工具调用、代码执行或反思循环；当前文本模型实验室不会把它们伪装成一个 Prompt 复选框。</p></details>
       <label>每组独立采样次数<select value={sampleCount} onChange={(event) => setSampleCount(Number(event.target.value))}><option value={1}>1 次（总计 2 次调用）</option><option value={2}>2 次（总计 4 次调用）</option><option value={3}>3 次（总计 6 次调用）</option></select></label>
       <section className="experiment-note"><p className="eyebrow">{experimentMode === "combo" ? "组合探索" : "本轮设计"}</p><h3>{experimentTitle}</h3><p>{experimentNotice}</p></section>
-      <button className="button" disabled={loading} onClick={runExperiment}>{loading ? "模型运行中…" : "运行本轮实验（调用模型 " + totalCalls + " 次）"}</button>{error && <p className="notice">{error}</p>}
+      <button className="button" disabled={loading} onClick={runExperiment}>{loading ? "模型运行中…" : "运行本轮实验（调用模型 " + totalCalls + " 次）"}</button>{error && <p className="notice" role="alert">{error}</p>}
     </section>
 
     <section className="panel">
@@ -169,11 +169,11 @@ export function Playground() {
       <div className="variant-grid"><VariantEditor title="对照组" variant={control} onChange={setControl} /><VariantEditor title="实验组" variant={treatment} onChange={setTreatment} /></div>
     </section>
 
-    <section className="panel experiment-results">
-      <p className="eyebrow">实验输出</p><h2>{controlResults.length && treatmentResults.length ? "对照组与实验组原始输出" : "等待运行"}</h2>
-      {!controlResults.length && <p className="empty">运行后直接查看两组原始输出；不再展示汇总指标表，也不做主观打分。</p>}
-      <ResultGroup title="对照组输出" results={controlResults} expectedFields={scenario?.expectedFields} />
-      <ResultGroup title="实验组输出" results={treatmentResults} expectedFields={scenario?.expectedFields} />
+    <section className="panel experiment-results" aria-busy={loading}>
+      <p className="eyebrow">实验输出</p><h2>{controlResults.length && treatmentResults.length ? "对照组与实验组原始输出" : loading ? "正在运行实验…" : "等待运行"}</h2>
+      {loading ? <div className="result-loading" role="status"><span className="sr-only">正在等待模型返回对照组与实验组结果</span><div className="skeleton-line" /><div className="skeleton-line" /><div className="skeleton-line" /></div> : !controlResults.length && <p className="empty">运行一轮实验，在这里并排查看两组原始输出、格式、耗时和 Token 用量。</p>}
+      <div className="result-columns"><ResultGroup title="对照组输出" results={controlResults} expectedFields={scenario?.expectedFields} />
+      <ResultGroup title="实验组输出" results={treatmentResults} expectedFields={scenario?.expectedFields} /></div>
     </section>
   </div>;
 }
