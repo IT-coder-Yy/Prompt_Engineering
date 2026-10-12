@@ -69,3 +69,43 @@ test("手机导航与明暗切换可用，主要页面不横向溢出", async ({
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
   }
 });
+
+test("页面保存 API 配置后刷新仍保留，实验立即使用，清除后恢复默认", async ({ page }) => {
+  const requests: Array<{ connection?: { baseUrl: string; model: string; apiKey: string } }> = [];
+  await page.route("**/api/completions", (route) => {
+    const data = route.request().postDataJSON(); requests.push(data);
+    return route.fulfill({ json: { content: "已使用测试连接", demo: false, model: data.connection?.model ?? "服务器默认模型", elapsedMs: 10 } });
+  });
+  await page.goto("/setup", { waitUntil: "domcontentloaded" });
+  await page.getByRole("textbox", { name: "Base URL", exact: true }).fill("https://api.example.com/v1/");
+  await page.getByRole("textbox", { name: "Model", exact: true }).fill("test-browser-model");
+  await page.getByLabel("API Key", { exact: true }).fill("test-browser-key-only");
+  await page.getByRole("button", { name: "保存配置", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("已保存");
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("textbox", { name: "Base URL", exact: true })).toHaveValue("https://api.example.com/v1");
+  await expect(page.getByRole("textbox", { name: "Model", exact: true })).toHaveValue("test-browser-model");
+  await expect(page.getByLabel("API Key", { exact: true })).toHaveAttribute("type", "password");
+  await expect(page.getByLabel("API Key", { exact: true })).toHaveValue("test-browser-key-only");
+  await page.getByRole("link", { name: "去实验室 →" }).click();
+  await page.getByRole("button", { name: "运行本轮实验（调用模型 2 次）" }).click();
+  await expect(page.getByRole("heading", { name: "对照组输出", exact: true })).toBeVisible();
+  expect(requests).toHaveLength(2);
+  for (const request of requests) expect(request.connection).toEqual({ baseUrl: "https://api.example.com/v1", model: "test-browser-model", apiKey: "test-browser-key-only" });
+  await page.getByRole("link", { name: "API 配置", exact: true }).click();
+  await page.getByRole("textbox", { name: "Model", exact: true }).fill("updated-model");
+  await page.getByRole("button", { name: "保存配置", exact: true }).click();
+  await page.getByRole("link", { name: "去实验室 →" }).click();
+  await page.getByRole("button", { name: "运行本轮实验（调用模型 2 次）" }).click();
+  await expect(page.getByRole("heading", { name: "对照组输出", exact: true })).toBeVisible();
+  expect(requests.at(-1)?.connection?.model).toBe("updated-model");
+  await page.getByRole("link", { name: "API 配置", exact: true }).click();
+  await page.getByRole("button", { name: "清除已保存配置" }).click();
+  await expect(page.getByLabel("API Key", { exact: true })).toHaveValue("");
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("textbox", { name: "Model", exact: true })).toHaveValue("");
+  await page.getByRole("link", { name: "去实验室 →" }).click();
+  await page.getByRole("button", { name: "运行本轮实验（调用模型 2 次）" }).click();
+  await expect(page.getByRole("heading", { name: "对照组输出", exact: true })).toBeVisible();
+  expect(requests.at(-1)?.connection).toBeUndefined();
+});

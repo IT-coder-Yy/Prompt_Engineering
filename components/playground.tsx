@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { type Scenario, findScenario, scenarios } from "@/lib/content";
 import { inspectJson } from "@/lib/evaluation";
+import { readBrowserApiConfig } from "@/lib/browser-api-config";
 
 type Parameters = {
   temperature: number;
@@ -127,6 +128,7 @@ export function Playground() {
     const stop = variant.parameters.stopText.split(/\n|,/).map((item) => item.trim()).filter(Boolean);
     const prompt = task.trim() ? variant.prompt + "\n\n--- 用户任务或材料 ---\n" + task.trim() : variant.prompt;
     const response = await fetch("/api/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+      connection: readBrowserApiConfig() ?? undefined,
       system, prompt, temperature: variant.parameters.temperature, topP: variant.parameters.topP, maxTokens: variant.parameters.maxTokens,
       stop, frequencyPenalty: variant.parameters.frequencyPenalty, presencePenalty: variant.parameters.presencePenalty
     }) });

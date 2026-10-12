@@ -1,5 +1,7 @@
 import { z } from "zod";
+import { apiConfigSchema } from "./api-config";
 export const completionRequestSchema = z.object({
+  connection: apiConfigSchema.optional(),
   system: z.string().trim().min(1, "请填写系统说明").max(4000),
   prompt: z.string().trim().min(1, "请填写 Prompt").max(16000),
   temperature: z.number().min(0).max(2).optional().default(0.3),
