@@ -156,10 +156,17 @@ main > .shell:not(.hero):last-child { margin-bottom: 80px; }
 .page-head h1 { max-width: 980px; }
 .lesson-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 46px; }
 .lesson-card { display: grid; grid-template-columns: 124px 1fr; gap: 24px; padding: 28px 0; border-top: 1px solid var(--line); }
-.lesson-card h2 { font-size: 20px; margin-bottom: 10px; }
+.lesson-card h3 { font-size: 20px; margin-bottom: 10px; }
 .lesson-card p:not(.meta) { font-size: 14px; color: var(--muted); margin-bottom: 14px; }
 .lesson-card .meta { margin-bottom: 10px; }
 .lesson-card .text-link { color: var(--brand); }
+.lesson-sources a, .learning-resources a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+.learning-nav { margin-bottom: 36px; }
+.learning-track { margin-bottom: 36px; scroll-margin-top: 110px; }
+.learning-track > h2 { font-size: 25px; }
+.learning-resources { margin-block: 24px 60px; }
+.learning-resources ul { display: flex; flex-wrap: wrap; gap: 12px 28px; padding-left: 20px; }
+.lesson-sources { scroll-margin-top: 110px; }
 .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .scenario-card { display: flex; flex-direction: column; align-items: flex-start; border: 1px solid var(--line); border-radius: var(--radius); padding: 25px; background: var(--surface); transition: border-color .18s, transform .18s; }
 .scenario-card:hover { border-color: var(--brand); transform: translateY(-2px); }

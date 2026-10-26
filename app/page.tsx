@@ -37,7 +37,7 @@ export default function Home() {
     </section>
 
     <section className="section shell home-lessons">
-      <div className="section-heading split"><div><h2>先从一节小课开始</h2><p>{lessons.length} 节课程，把基础学扎实。</p></div><Link className="text-link" href="/learn">查看完整学习路径 <ArrowUpRight size={18} aria-hidden="true" /></Link></div>
+      <div className="section-heading split"><div><h2>先从一节小课开始</h2><p>{lessons.length} 节课程，从基础到研究与应用。</p></div><Link className="text-link" href="/learn">查看完整学习路径 <ArrowUpRight size={18} aria-hidden="true" /></Link></div>
       <div className="lesson-preview-grid">
         {lessons.slice(0, 3).map((lesson, index) => <article className={index === 0 ? "lesson-preview featured" : "lesson-preview"} key={lesson.slug}>
           <LessonArt index={index} />

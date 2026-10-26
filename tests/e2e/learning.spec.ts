@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { lessons } from "../../lib/content";
 
 test("学习路径可进入课程", async ({ page }) => {
   await page.goto("/");
@@ -6,6 +7,30 @@ test("学习路径可进入课程", async ({ page }) => {
   await page.getByRole("link", { name: "从第一课开始" }).click();
   await page.getByRole("link", { name: "进入课程" }).first().click();
   await expect(page.getByText("同一个需求，两种写法")).toBeVisible();
+  await page.getByRole("link", { name: "查看本课出处 ↓" }).click();
+  await expect(page.getByRole("heading", { name: "参考与出处" })).toBeVisible();
+  await expect(page.locator("#sources")).toContainText("DAIR.AI");
+});
+
+test("扩充课程分组、编号、出处和前后衔接完整", async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.goto("/learn");
+  await expect(page.getByRole("link", { name: "进入课程" })).toHaveCount(27);
+  await expect(page.getByText("27 节课程", { exact: false })).toContainText(`${lessons.reduce((sum, lesson) => sum + lesson.minutes, 0)} 分钟`);
+  await expect(page.getByText("第 10 课", { exact: false })).toBeVisible();
+  await page.getByRole("navigation", { name: "课程分组" }).getByRole("link", { name: "研究进阶", exact: false }).click();
+  await expect(page).toHaveURL(/#track-2$/);
+  for (const [index, lesson] of lessons.entries()) {
+    await page.goto(`/learn/${lesson.slug}`);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(lesson.title);
+    const sources = page.getByRole("region", { name: "参考与出处" });
+    await expect(sources.getByRole("link")).toHaveCount(lesson.sources.length);
+    for (const source of lesson.sources) {
+      await expect(sources.getByRole("link", { name: `${source.title} ↗`, exact: true })).toHaveAttribute("href", source.url);
+    }
+    const nextLesson = lessons[index + 1];
+    await expect(page.getByRole("link", { name: nextLesson ? "下一课 →" : "开始业务案例 →" })).toHaveAttribute("href", nextLesson ? `/learn/${nextLesson.slug}` : "/scenarios");
+  }
 });
 
 test("场景库可打开全部案例，旧模板链接会跳转", async ({ page }) => {
@@ -63,7 +88,7 @@ test("手机导航与明暗切换可用，主要页面不横向溢出", async ({
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.getByRole("button", { name: "切换明暗主题" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  for (const route of ["/", "/learn", "/scenarios", "/learn/model-and-prompt", "/scenarios/%E5%8A%9E%E5%85%AC-a", "/playground", "/setup"]) {
+  for (const route of ["/", "/learn", "/scenarios", "/learn/model-and-prompt", "/learn/multimodal-and-graph", "/learn/context-engineering", "/scenarios/%E5%8A%9E%E5%85%AC-a", "/playground", "/setup"]) {
     await page.goto(route);
     await expect(page.locator("h1")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
