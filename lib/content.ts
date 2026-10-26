@@ -602,8 +602,8 @@ const scenario = (draft: ScenarioDraft): Scenario => {
     {
       id: "prompt-comparison",
       kind: "prompt",
-      title: "整体 Prompt 对比",
-      changedVariable: "Prompt 写法（这是整体对比，不是严格消融）",
+      title: "提示词写法对比 · 建议先试",
+      changedVariable: "提示词的写法与规则一起变化，不能把效果归因于单独一处修改。",
       explanation: "比较简短、模糊的写法与可验收的完整写法。多项内容会同时变化，适合先直观看见 Prompt 设计的整体影响。",
       observation: "观察输出是否更贴近任务、是否保留限制，以及格式是否更稳定。",
       control: { label: "对照：常见但不稳的 Prompt", prompt: draft.weakPrompt, temperature: 0.3 },
@@ -612,9 +612,9 @@ const scenario = (draft: ScenarioDraft): Scenario => {
     {
       id: "temperature-ablation",
       kind: "parameter",
-      title: "temperature 参数消融",
-      changedVariable: "temperature：0.1 → 0.9；Prompt 与输入保持相同",
-      explanation: "这是严格消融：只改变采样随机性。低 temperature 通常更稳定；高 temperature 往往带来更多措辞或内容变化。",
+      title: "回答随机性对比 · 只改 Temperature",
+      changedVariable: "随机性（Temperature）：0.1 → 0.9；提示词与输入保持相同",
+      explanation: "使用同样的提示词和材料，只比较低随机性（0.1）与高随机性（0.9）。前者通常更稳定，后者往往带来更多措辞或内容变化。",
       observation: "比较结构是否仍稳定、措辞是否更发散，以及是否出现超出材料的内容。",
       control: { label: "对照：低 temperature（0.1）", prompt: draft.improvedPrompt, temperature: 0.1 },
       treatment: { label: "实验：高 temperature（0.9）", prompt: draft.improvedPrompt, temperature: 0.9 }
@@ -624,7 +624,7 @@ const scenario = (draft: ScenarioDraft): Scenario => {
     experiments.push({
       id: "structured-output-ablation",
       kind: "technique",
-      title: "结构化输出技术消融",
+      title: "输出格式对比 · 是否要求 JSON",
       changedVariable: "只加入或移除“输出 JSON 字段”这一条指令",
       explanation: "两组任务、材料、限制和参数一致；实验组仅增加固定 JSON 字段要求，演示结构化输出技术的效果。",
       observation: "观察实验组是否更容易被程序解析、字段是否更齐全；这改善可用性，不自动保证事实正确。",

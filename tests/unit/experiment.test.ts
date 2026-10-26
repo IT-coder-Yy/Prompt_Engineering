@@ -10,7 +10,7 @@ describe("实验配置与实际请求", () => {
       expect(draftError(draft), scenario.slug + preset.id).toBeNull();
       if (preset.kind === "parameter") {
         expect(resolvePrompt(draft, "a")).toBe(resolvePrompt(draft, "b"));
-        expect(parameterChanges(draft.a.parameters, draft.b.parameters)).toEqual(["Temperature：0.1 → 0.9"]);
+        expect(parameterChanges(draft.a.parameters, draft.b.parameters)).toEqual(["随机性（Temperature）：0.1 → 0.9"]);
       }
     }
   });

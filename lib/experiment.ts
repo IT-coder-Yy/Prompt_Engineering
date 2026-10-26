@@ -7,9 +7,11 @@ export type Variant = { prompt: string; parameters: Parameters };
 export type Side = "a" | "b";
 export type ExperimentMode = "preset" | "single" | "combo" | "manual";
 export const techniques = [
-  { id: "zero-shot", title: "零样本提示" }, { id: "few-shot", title: "少样本提示" },
-  { id: "cot", title: "分步求解与简短依据" }, { id: "directional", title: "方向性刺激提示" },
-  { id: "structured", title: "结构化输出" },
+  { id: "zero-shot", title: "零样本 · 直接给任务", description: "不提供示例，直接说明任务。观察模型能否仅凭指令完成要求。" },
+  { id: "few-shot", title: "少样本 · 提供参考示例", description: "给 B 增加输入—输出示例，让模型参考格式和处理方式。先在下方填写示例，再观察输出是否更符合要求。" },
+  { id: "cot", title: "分步求解 · 拆解任务", description: "让 B 将问题分成可核验的小步骤，并给出答案和简短依据。观察是否遗漏步骤、结论是否有依据。" },
+  { id: "directional", title: "方向提示 · 指定关注重点", description: "给 B 增加需要关注的关键词。先填写关注重点，再观察结果是否覆盖这些内容。" },
+  { id: "structured", title: "结构化输出 · 约定 JSON 字段", description: "让 B 按指定字段输出 JSON，便于程序读取。观察格式和字段是否齐全；格式正确不代表内容正确。" },
 ];
 export type ExperimentDraft = {
   scenarioSlug: string; presetId: string; mode: ExperimentMode; technique: string; combo: string[];
@@ -98,7 +100,7 @@ export function draftError(draft: ExperimentDraft): string | null {
 }
 
 export function parameterChanges(a: Parameters, b: Parameters) {
-  const labels: Record<keyof Parameters, string> = { temperature: "Temperature", topP: "Top_p", maxTokens: "输出 Token 上限", stopText: "停止序列", frequencyPenalty: "频率惩罚", presencePenalty: "存在惩罚" };
+  const labels: Record<keyof Parameters, string> = { temperature: "随机性（Temperature）", topP: "候选范围（Top_p）", maxTokens: "输出上限（Max Tokens）", stopText: "停止标记", frequencyPenalty: "频率惩罚", presencePenalty: "存在惩罚" };
   return (Object.keys(labels) as (keyof Parameters)[]).filter((key) => a[key] !== b[key])
     .map((key) => `${labels[key]}：${a[key] === undefined || a[key] === "" ? "服务默认" : a[key]} → ${b[key] === undefined || b[key] === "" ? "服务默认" : b[key]}`);
 }
