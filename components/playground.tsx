@@ -9,6 +9,13 @@ import { completionInput, createDraft, draftError, generateDesign, parameterChan
 import { ExperimentResults, type ExperimentRun, type Sample } from "./experiment-results";
 import { TextDiff } from "./text-diff";
 
+const experimentModes = {
+  preset: { title: "跟着案例做 · 推荐新手", description: "自动填好 A/B 的提示词与参数。再选一个预设实验，就能用现成方案体验差别。" },
+  single: { title: "只试一种技巧 · 观察单项变化", description: "从同一份提示词开始，只给 B 加一种技巧。选择下方的技巧并补充所需内容，再观察它带来的变化。" },
+  combo: { title: "组合多种技巧 · 探索组合效果", description: "给 B 同时增加多种技巧，适合探索组合效果。多项一起变化时，不能判断是哪一项带来了改善。" },
+  manual: { title: "自己编写 A/B · 自由对比", description: "自由编辑两侧的提示词和参数。建议每轮只改一个因素，这样更容易解释结果差异。" },
+} satisfies Record<ExperimentMode, { title: string; description: string }>;
+
 function storedDraft(slug: string, preset?: string) {
   const scenario = findScenario(slug);
   let values = scenario?.sampleInput;
@@ -40,6 +47,7 @@ function Workspace({ initialSlug, initialPreset }: { initialSlug: string; initia
   useEffect(() => () => { controllers.current.forEach((controller) => controller.abort()); }, []);
 
   const scenario = findScenario(draft.scenarioSlug);
+  const preset = draft.mode === "preset" ? scenario?.experiments.find((item) => item.id === draft.presetId) : undefined;
   const enabled = selectedTechniques(draft);
   const busy = Boolean(run && [...run.a, ...run.b].some((sample) => sample.status === "pending"));
   const stale = Boolean(run && JSON.stringify(run.draft) !== JSON.stringify(draft));
@@ -123,14 +131,15 @@ function Workspace({ initialSlug, initialPreset }: { initialSlug: string; initia
           </details>
         </section>
         <section className="panel design-panel">
-          <label>实验模式<select value={draft.mode} onChange={(event) => changeDesign({ mode: event.target.value as ExperimentMode, ...(event.target.value === "manual" ? { title: "自定义 A/B 对比", notice: "自由编辑两种写法，运行前检查实际差异。" } : {}) })}>{scenario && <option value="preset">场景预设实验</option>}<option value="single">单项提示技术</option><option value="combo">提示技术组合</option><option value="manual">手工编辑 A/B</option></select></label>
-          {draft.mode === "preset" && <label>预设实验<select value={draft.presetId} onChange={(event) => changeDesign({ presetId: event.target.value })}>{scenario?.experiments.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>}
-          {draft.mode === "single" && <label>提示技术<select value={draft.technique} onChange={(event) => changeDesign({ technique: event.target.value })}>{techniques.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>}
-          {draft.mode === "combo" && <div className="technique-options">{techniques.map((item) => <label key={item.id}><input type="checkbox" checked={draft.combo.includes(item.id)} onChange={(event) => changeDesign({ combo: event.target.checked ? [...draft.combo, item.id] : draft.combo.filter((id) => id !== item.id) })} />{item.title}</label>)}</div>}
+          <label>实验模式<select aria-describedby="experiment-mode-help" value={draft.mode} onChange={(event) => changeDesign({ mode: event.target.value as ExperimentMode, ...(event.target.value === "manual" ? { title: "自定义 A/B 对比", notice: "自由编辑两种写法，运行前检查实际差异。" } : {}) })}>{Object.entries(experimentModes).filter(([mode]) => mode !== "preset" || scenario).map(([mode, item]) => <option key={mode} value={mode}>{item.title}</option>)}</select></label>
+          <p className="selection-help" id="experiment-mode-help">{experimentModes[draft.mode].description}</p>
+          {draft.mode === "preset" && <><label>预设实验<select aria-describedby="experiment-preset-help" value={draft.presetId} onChange={(event) => changeDesign({ presetId: event.target.value })}>{scenario?.experiments.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><p className="selection-help" id="experiment-preset-help">{preset?.explanation}</p></>}
+          {draft.mode === "single" && <><label>提示技术<select aria-describedby="experiment-technique-help" value={draft.technique} onChange={(event) => changeDesign({ technique: event.target.value })}>{techniques.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label><p className="selection-help" id="experiment-technique-help">{techniques.find((item) => item.id === draft.technique)?.description}</p></>}
+          {draft.mode === "combo" && <div className="technique-options">{techniques.map((item) => <div key={item.id}><label><input type="checkbox" aria-describedby={"technique-help-" + item.id} checked={draft.combo.includes(item.id)} onChange={(event) => changeDesign({ combo: event.target.checked ? [...draft.combo, item.id] : draft.combo.filter((id) => id !== item.id) })} />{item.title}</label><p className="field-hint" id={"technique-help-" + item.id}>{item.description}</p></div>)}</div>}
           {enabled.includes("few-shot") && <label>少样本示例<textarea value={draft.examples} onChange={(event) => changeDesign({ examples: event.target.value })} placeholder="填写与当前任务相关的输入—输出示例。" /></label>}
           {enabled.includes("directional") && <label>方向关键词<input value={draft.direction} onChange={(event) => changeDesign({ direction: event.target.value })} /></label>}
           {enabled.includes("structured") && <label>结构化字段<input value={draft.fields} onChange={(event) => changeDesign({ fields: event.target.value })} /></label>}
-          <div className="experiment-note"><span className="eyebrow">本轮改变什么</span><h3>{draft.title}</h3><p>{draft.notice}</p></div>
+          <div className="experiment-note"><span className="eyebrow">本轮改变什么</span><h3>{draft.title}</h3>{preset ? <><p>{preset.changedVariable}</p><p><b>运行后看：</b>{preset.observation}</p></> : <p>{draft.notice}</p>}</div>
           <details className="advanced-settings"><summary>任务验收要求</summary><label>人工验收项（每行一项）<textarea value={draft.criteria} onChange={(event) => update({ criteria: event.target.value })} placeholder="例如：保留全部明确日期；不编造负责人。" /></label><label className="checkbox-label"><input type="checkbox" checked={draft.checkJson} onChange={(event) => update({ checkJson: event.target.checked })} />启用共同 JSON 格式基准</label>{draft.checkJson && <label>必需的顶层字段（逗号分隔）<input value={draft.expectedFields} onChange={(event) => update({ expectedFields: event.target.value })} placeholder="留空时只检查 JSON 是否可解析" /></label>}<p className="field-hint">验收条件不修改 Prompt。格式通过不代表事实正确；也可专门比较指定格式前后的效果。</p></details>
         </section>
       </div>
@@ -164,12 +173,12 @@ function VariantEditor({ side, variant, onChange }: { side: Side; variant: Varia
   return <section className="variant-editor" aria-label={side.toUpperCase() + " 组编辑"}>
     <h3><span className="side-tag">{side.toUpperCase()}</span>{side === "a" ? "对照组 · 作为基准" : "实验组 · 尝试改进"}</h3>
     <label>{side.toUpperCase()} Prompt<textarea value={variant.prompt} onChange={(event) => onChange({ ...variant, prompt: event.target.value })} placeholder={side === "a" ? "填写基础写法…" : "填写你要比较的新写法…"} /></label>
-    <details className="parameter-details"><summary>模型参数</summary><div className="parameter-grid">
-      <label>Temperature<input type="number" min="0" max="2" step="0.1" value={parameters.temperature} onChange={(event) => setParameter({ temperature: Number(event.target.value) })} /></label>
-      <label>Top_p<input type="number" min="0" max="1" step="0.05" value={parameters.topP ?? ""} onChange={(event) => setParameter({ topP: optionalNumber(event.target.value) })} placeholder="服务默认" /></label>
-      <label>Max Length / 输出 Token<input type="number" min="32" max="4096" step="32" value={parameters.maxTokens} onChange={(event) => setParameter({ maxTokens: Number(event.target.value) })} /></label>
-      <label>Frequency Penalty<input type="number" min="-2" max="2" step="0.1" value={parameters.frequencyPenalty ?? ""} onChange={(event) => setParameter({ frequencyPenalty: optionalNumber(event.target.value) })} placeholder="服务默认" /></label>
-      <label>Presence Penalty<input type="number" min="-2" max="2" step="0.1" value={parameters.presencePenalty ?? ""} onChange={(event) => setParameter({ presencePenalty: optionalNumber(event.target.value) })} placeholder="服务默认" /></label>
-    </div><label>Stop Sequences（每行或逗号一个）<textarea value={parameters.stopText} onChange={(event) => setParameter({ stopText: event.target.value })} placeholder="最多 4 个，留空不设置" /></label><p className="field-hint">可选参数留空时使用服务默认值；支持范围由上游模型决定。</p></details>
+    <details className="parameter-details"><summary>模型参数</summary><p className="field-hint parameter-intro">第一次可保留默认值；只比较提示词时，两组参数保持相同。</p><div className="parameter-grid">
+      <div><label htmlFor={side + "-temperature"}>随机性（Temperature）</label><input id={side + "-temperature"} aria-describedby={side + "-temperature-help"} type="number" min="0" max="2" step="0.1" value={parameters.temperature} onChange={(event) => setParameter({ temperature: Number(event.target.value) })} /><p className="field-hint" id={side + "-temperature-help"}>越低通常越稳定，越高通常越多样；不代表准确度。</p></div>
+      <div><label htmlFor={side + "-top-p"}>候选范围（Top_p）</label><input id={side + "-top-p"} aria-describedby={side + "-top-p-help"} type="number" min="0" max="1" step="0.05" value={parameters.topP ?? ""} onChange={(event) => setParameter({ topP: optionalNumber(event.target.value) })} placeholder="服务默认" /><p className="field-hint" id={side + "-top-p-help"}>越小越集中于高概率用词。通常与随机性选一个调整，不确定时留空。</p></div>
+      <div><label htmlFor={side + "-max-tokens"}>输出上限（Max Tokens）</label><input id={side + "-max-tokens"} aria-describedby={side + "-max-tokens-help"} type="number" min="32" max="4096" step="32" value={parameters.maxTokens} onChange={(event) => setParameter({ maxTokens: Number(event.target.value) })} /><p className="field-hint" id={side + "-max-tokens-help"}>限制最长输出。Token 是模型处理文本的单位，不等于字数；上限太小可能截断答案。</p></div>
+      <div><label htmlFor={side + "-frequency"}>频率惩罚（Frequency Penalty）</label><input id={side + "-frequency"} aria-describedby={side + "-frequency-help"} type="number" min="-2" max="2" step="0.1" value={parameters.frequencyPenalty ?? ""} onChange={(event) => setParameter({ frequencyPenalty: optionalNumber(event.target.value) })} placeholder="服务默认" /><p className="field-hint" id={side + "-frequency-help"}>按出现次数抑制重复用词；正值越大抑制越强，负值相反。不确定时留空。</p></div>
+      <div><label htmlFor={side + "-presence"}>存在惩罚（Presence Penalty）</label><input id={side + "-presence"} aria-describedby={side + "-presence-help"} type="number" min="-2" max="2" step="0.1" value={parameters.presencePenalty ?? ""} onChange={(event) => setParameter({ presencePenalty: optionalNumber(event.target.value) })} placeholder="服务默认" /><p className="field-hint" id={side + "-presence-help"}>按是否出现过来抑制重复用词；正值鼓励新内容，负值相反。不确定时留空。</p></div>
+    </div><label htmlFor={side + "-stop"}>停止标记（Stop Sequences）</label><textarea id={side + "-stop"} aria-describedby={side + "-stop-help"} value={parameters.stopText} onChange={(event) => setParameter({ stopText: event.target.value })} placeholder="例如：END；不需要时留空" /><p className="field-hint" id={side + "-stop-help"}>生成到这些文本时停止，标记本身不返回。每行或逗号一个，最多 4 个；不确定时留空。</p><p className="field-hint">可选参数留空时使用服务默认值；支持范围由上游模型决定。<Link href="/learn/parameters">了解参数与例子 ↗</Link></p></details>
   </section>;
 }

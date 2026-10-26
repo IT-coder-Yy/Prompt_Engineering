@@ -29,8 +29,11 @@
 .experiment-note { margin: 22px 0; padding: 18px; background: var(--brand-soft); border-radius: 8px; }
 .experiment-note h3 { margin: 8px 0; }
 .experiment-note p { margin: 0; font-size: 13px; }
-.technique-options { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+.experiment-note p + p { margin-top: 10px; }
+.selection-help { margin: -8px 0 22px; font-size: 13px; line-height: 1.7; color: var(--muted); }
+.technique-options { display: grid; gap: 14px; }
 .technique-options label { margin: 0; }
+.technique-options .field-hint { margin: 6px 0 0 24px; }
 .prompt-workspace { margin-top: 20px; }
 .variant-grid, .result-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .variant-editor { min-width: 0; }
@@ -41,6 +44,11 @@
 .variant-editor .parameter-details textarea { min-height: 72px; }
 .parameter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
 .parameter-grid label { margin: 0; font-size: 12px; }
+.parameter-grid > div { min-width: 0; }
+.parameter-grid .field-hint { margin: 8px 0 0; }
+.parameter-intro { margin: 14px 0 0; }
+.parameter-details > label { margin-bottom: 0; }
+.parameter-details .field-hint a { color: var(--brand); }
 .parameter-summary { display: flex; gap: 16px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 20px; margin-top: 24px; font-size: 13px; }
 .parameter-summary span { color: var(--muted); }
 .prompt-review { margin-top: 16px; }
@@ -126,7 +134,7 @@
   .variant-grid, .result-columns { grid-template-columns: 1fr; }
   .variant-editor + .variant-editor { border-left: 0; border-top: 1px solid var(--line); padding: 22px 0 0; }
   .playground input, .playground select, .playground textarea { font-size: 16px; }
-  .parameter-grid { gap: 12px; }
+  .parameter-grid { grid-template-columns: 1fr; gap: 18px; }
   .diff-row { grid-template-columns: 1fr; }
   .diff-cell + .diff-cell { border-left: 0; }
   .diff-placeholder, .diff-equal-row .diff-cell:nth-child(2) { display: none; }

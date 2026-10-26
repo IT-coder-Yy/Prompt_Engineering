@@ -57,7 +57,7 @@ test("实验室主动运行一轮对照组与实验组", async ({ page }) => {
   await expect(page.getByRole("textbox", { name: "用户任务 / 问题 / 材料" })).toBeVisible();
   await page.getByRole("combobox", { name: "业务场景" }).selectOption("办公-a");
   await page.getByText("模型参数", { exact: true }).first().click();
-  await page.getByRole("spinbutton", { name: "Max Length / 输出 Token" }).first().fill("80");
+  await page.getByRole("spinbutton", { name: "输出上限（Max Tokens）" }).first().fill("80");
   await page.getByRole("button", { name: "运行本轮实验（调用模型 2 次）" }).click();
   await expect(page.getByRole("heading", { name: "对照组输出", exact: true })).toBeVisible({ timeout: 30000 });
   await expect(page.getByRole("heading", { name: "实验组输出", exact: true })).toBeVisible({ timeout: 30000 });
