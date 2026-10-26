@@ -8,6 +8,8 @@ vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams()
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 it("表单保存和恢复的配置会用于两组实验，清除后不再发送", async () => {
+  // jsdom 不实现布局与滚动；这里验证配置传递，滚动由浏览器测试覆盖。
+  vi.stubGlobal("requestAnimationFrame", () => 0);
   const items = new Map<string, string>();
   vi.stubGlobal("localStorage", {
     getItem: (key: string) => items.get(key) ?? null,
